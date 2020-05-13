@@ -1,0 +1,9 @@
+This is a text file indicating instructions on how OpenCV4 was compiled on this Raspberry Pi 4
+
+Follow this link for the most part: https://www.pyimagesearch.com/2019/09/16/install-opencv-4-on-raspberry-pi-4-and-raspbian-buster/
+
+Caveats:
+
+1. Use pip3 instead of pip to install all python packages. For some reason, pip3 is not simlinked to pip
+
+2. The cv2.so file is located in /usr/local/lib/python3.7/dist-packages/cv2/python-3.7. There is a symlink from the cv virtualenv pointing to that file.
