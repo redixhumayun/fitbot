@@ -3,6 +3,7 @@ import cv2
 import sys
 import numpy as np
 from picameravideostream import PiCameraVideoStream
+from fps import FPS
 
 # Setting this to output full numpy array and not truncated form
 np.set_printoptions(threshold=sys.maxsize)
@@ -21,6 +22,7 @@ net = cv2.dnn.readNetFromCaffe("model/MobileNetSSD_deploy.prototxt.txt", "model/
 
 # Start the video stream and sleep for 2s to warm up camera sensor
 video_stream = PiCameraVideoStream().start()
+fps = FPS().start()
 time.sleep(2.0)
 
 start = time.time()
@@ -39,6 +41,8 @@ while True:
   net.setInput(blob)
   detections = net.forward()
 
+  fps.update()
+
   """
   Detections is an array of shape [1, 1, 100, 7]
   The inner-most element is a 1D array of size 7. In this innermost array(call it arr),
@@ -55,3 +59,5 @@ while True:
       label = CLASSES[idx]
       box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
       print(box)
+
+fps.stop()
