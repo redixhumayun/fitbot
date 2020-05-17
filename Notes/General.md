@@ -1,7 +1,20 @@
 THIS IS A GENERAL RESOURCE FOR ANY INFORMATION THAT MIGHT BE BENIFICIAL IN THE FUTURE
 
-# Connecting Motors
+# How PWM Works
 
+PWM stands for Pulse Width Modulation(PWM). A PWM signal is used for generating an analog signal from a digital source. There are two main components: a duty cycle and a frequency. 
+
+The duty cycle is the amount of time the signal is on high as a % of the total time it takes to complete one cycle. 
+
+The frequency is how fast one cycle is completed.
+
+##  Example
+Let's say we have a motor which requires a PWM signal of 50Hz. 
+
+Therefore, the frequency = 50 Hz = 1/50 sec = 0.02 sec. If the signal is on high for 1ms, 
+duty cycle = (1ms/20ms)*100 = 5%
+
+# Connecting Motors
 
 ## DC Motors
 The eventual goal is to be able to connect 4 DC motors to the Pi and control the direction and speech of each individually.
@@ -21,6 +34,10 @@ A good tutorial of hooking up the L298N with the Pi and a DC motor can be found 
 
 The FitBot will require the connection of two servo motors to control the Pan-Tilt hat. The Pan-Tilt hat current purchased is [this one](https://robu.in/product/2-axis-pan-tilt-camera-mount-camerasensors-servo-sg90s-mg90s/). 
 
+The SG90 servo motor runs on a PWM frequency of 50Hz. 
+
 The servo motors should be easier to power since I will be using basic SG90 servo motors for now. A power source of 4-6V should be enough to power them. Alternatively, it might be possible to power them directly from the Pi, but this might result in overdrawing current from the Pi which could damage the board.
 
 Controlling the input signal to the motor can again be done using the PiGPIO library. Refer to [this](https://tutorials-raspberrypi.com/raspberry-pi-servo-motor-control/) tutorial and [this](https://www.electronicshub.org/raspberry-pi-servo-motor-interface-tutorial/) tutorial. Refer to [this](https://lastminuteengineers.com/servo-motor-arduino-tutorial/) link for a more in-depth understanding of how servo motors work. 
+
+A 5% duty cycle indicates the far left position of the servo motor and a 10% duty cycle indicates the far right position of the servo motor. Therefore, the servo needs to be moved in small increments between 5% and 10% duty cycles.
