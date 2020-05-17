@@ -4,43 +4,56 @@ import sys
 import numpy as np
 from picameravideostream import PiCameraVideoStream
 from fps import FPS
+from keyboard_thread import KeyboardThread
+
+# Setting a global variable which will be edited by the keyboard_press_event_callback
+# when the user presses 'q'. Need to find an alternative to a global variable
+user_exit = False
+
+# This method is used as a callback for when the user presses a key
+def keyboard_press_event_callback(inp):
+  if inp == 'q':
+    global user_exit
+    user_exit = True
 
 # Setting this to output full numpy array and not truncated form
 np.set_printoptions(threshold=sys.maxsize)
 
 # Set of classes that OpenCV is set up to detect as an object
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
-	"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-	"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
-	"sofa", "train", "tvmonitor"]
+           "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+           "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+           "sofa", "train", "tvmonitor"]
 
 # Generate a random color in each class
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
 # Load the caffe model and prototxt file
-net = cv2.dnn.readNetFromCaffe("model/MobileNetSSD_deploy.prototxt.txt", "model/MobileNetSSD_deploy.caffemodel")
+net = cv2.dnn.readNetFromCaffe(
+    "model/MobileNetSSD_deploy.prototxt.txt", "model/MobileNetSSD_deploy.caffemodel")
 
-# Start the video stream and sleep for 2s to warm up camera sensor
+# 1. Start the video stream, and the keyboard listener thread
+# 2. Start the fps listener
+# 3. Sleep for 2s to allow camera sensor to warm up
 video_stream = PiCameraVideoStream().start()
+kthread = KeyboardThread(keyboard_press_event_callback)
+kthread.daemon = True # Setting this thread to be a daemon so it exits when the main program exits. This may not be a good idea.
+kthread.startThread()
 fps = FPS().start()
 time.sleep(2.0)
 
-start = time.time()
-
-
-while True:
+while not user_exit:
   frame = video_stream.read()
 
   # This frame has the shape (240, 320, 3) which implies that there are 240 rows
-  # each row has a width of 320 and the inner most value is the RGB value of a 
+  # each row has a set of 320 arrays and the inner most value is the RGB value of a
   # particular pixel
   (h, w) = frame.shape[:2]
   resized_frame = cv2.resize(frame, (300, 300))
-  blob = cv2.dnn.blobFromImage(resized_frame, 0.007843, (300, 300), 127.5)
-
+  blob = cv2.dnn.blobFromImage(
+      resized_frame, 0.007843, (300, 300), 127.5)
   net.setInput(blob)
   detections = net.forward()
-
   fps.update()
 
   """
@@ -51,13 +64,17 @@ while True:
   arr[3:7] represent bounding box coordinates represented as (x1, y1) and (x2, y2). 
   These coordinates have to be scaled up by the width and height of the original image.
   """
-  
-  for i in np.arange(0, detections.shape[2]):
-    confidence = detections[0, 0, i, 2]
-    if confidence > 0.25:
-      idx = int(detections[0, 0, i, 1])
-      label = CLASSES[idx]
-      box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-      print(box)
 
+  for i in np.arange(0, detections.shape[2]):
+      confidence = detections[0, 0, i, 2]
+      if confidence > 0.25:
+          idx = int(detections[0, 0, i, 1])
+          label = CLASSES[idx]
+          box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+          print(label)
+          print(box)
+
+# Stop all external modules and clean up threads
 fps.stop()
+kthread.stop()
+video_stream.stop()

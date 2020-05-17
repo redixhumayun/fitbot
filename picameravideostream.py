@@ -3,6 +3,9 @@ from picamera import PiCamera
 from threading import Thread
 import cv2
 
+"""
+This class is used to start the piCamera and run a separate thread to obtain frames from it.
+"""
 class PiCameraVideoStream:
   def __init__(self, resolution=(320, 240), framerate=32):
     self.camera = PiCamera()
