@@ -40,8 +40,10 @@ kthread = KeyboardThread(keyboard_press_event_callback)
 kthread.daemon = True # Setting this thread to be a daemon so it exits when the main program exits. This may not be a good idea.
 kthread.startThread()
 fps = FPS().start()
-time.sleep(2.0)
 
+print("Warming up sensor")
+time.sleep(2.0)
+print("Starting loop")
 while not user_exit:
   frame = video_stream.read()
 
