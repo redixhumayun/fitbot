@@ -10,7 +10,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(servo_pin, GPIO.OUT)
 
 # Set up the duty cycle values of the servo between 2 and 10
-control = np.linspace(2, 10, num = 20)
+control = np.linspace(4, 8, num = 20)
 
 # Set up the servo pin as a PWM pin and specify the duty cycle
 p = GPIO.PWM(servo_pin, 50)
