@@ -2,32 +2,26 @@ import RPi.GPIO as GPIO
 import numpy as np
 import time
 
-# Set up the correct GPIO pin number the servo is connected to
-# Set the pin numbering mode of the Pi to Broadcom mode
-# Set up the pin as an output
-servo_pin = 17
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(servo_pin, GPIO.OUT)
+class Servo:
+  def __init__(self, servo_pin=17):
+    self.servo_pin = servo_pin
+    self.run_loop = True
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(self.servo_pin, GPIO.OUT)
+    self.pwm = GPIO.PWM(self.servo_pin, 50)
+    self.pwm.start(0)
 
-# Set up the duty cycle values of the servo between 2 and 10
-control = np.linspace(4, 8, num = 20)
+  def rotate(self, pid_output, image_width):
+    value = pid_output.value
+    interpolation_result = self.get_interpolation_result(value, image_width)
+    # self.pwm.ChangeDutyCycle(interpolation_result)
 
-# Set up the servo pin as a PWM pin and specify the duty cycle
-p = GPIO.PWM(servo_pin, 50)
-p.start(0)
+  def get_interpolation_result(self, pid_output, image_width):
+    # Setting the input range to be -(image/width / 2) < x < (image_width / 2)
+    return np.interp(pid_output, [-(image_width / 2), (image_width / 2)], [2, 10])
 
-# Run a loop changing the duty cycle supplied by the servo pin to watch it rotate
-try:
-  while True:
-    for x in control:
-      print(x)
-      p.ChangeDutyCycle(x)
-      time.sleep(0.5)
-    
-    for x in reversed(control):
-      print(x)
-      p.ChangeDutyCycle(x)
-      time.sleep(0.5)
-except KeyboardInterrupt:
-  p.stop()
-  GPIO.cleanup()
+  def stop(self):
+    print("Stopping servo")
+    self.run_loop = False
+    self.pwm.stop()
+    GPIO.cleanup()
