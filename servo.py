@@ -5,7 +5,6 @@ import time
 class Servo:
   def __init__(self, servo_pin=17):
     self.servo_pin = servo_pin
-    self.run_loop = True
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(self.servo_pin, GPIO.OUT)
     self.pwm = GPIO.PWM(self.servo_pin, 50)
@@ -14,6 +13,7 @@ class Servo:
   def rotate(self, pid_output, image_width):
     value = pid_output.value
     interpolation_result = self.get_interpolation_result(value, image_width)
+    print(interpolation_result)
     # self.pwm.ChangeDutyCycle(interpolation_result)
 
   def get_interpolation_result(self, pid_output, image_width):
@@ -21,7 +21,5 @@ class Servo:
     return np.interp(pid_output, [-(image_width / 2), (image_width / 2)], [2, 10])
 
   def stop(self):
-    print("Stopping servo")
-    self.run_loop = False
     self.pwm.stop()
     GPIO.cleanup()
