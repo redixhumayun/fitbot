@@ -18,9 +18,12 @@ class FPS:
 
   def update(self):
     self._numFrames += 1
+    print(self.fps())
 
   def elapsed(self):
     return (self._end - self._start).total_seconds()
 
   def fps(self):
-    return self._numFrames / self.elapsed()
+    time_now = datetime.now()
+    elapsed_time = time_now - self._start
+    return self._numFrames / elapsed_time.total_seconds()
