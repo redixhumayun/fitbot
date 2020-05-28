@@ -47,15 +47,3 @@ class ServoClass:
 
         diff += 0.025
       time.sleep(1)
-
-  def move_servo_to_position(self, pid_output):
-    if self.moving is True:
-      # Servo is already currently moving
-      return
-    self.rotate(pid_output)
-  # def rotate(self, pid_output):
-  #   # interpolation_result = self.get_interpolation_result(value, image_width)
-  #   try:
-  #     self.servo.value = pid_output
-  #   except gpiozero.exc.OutputDeviceBadValue:
-  #     print('Bad value provided')
