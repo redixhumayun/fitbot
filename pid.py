@@ -25,7 +25,7 @@ class PID:
   def update(self, error):
     # Setting a sleep time of a higher value delays the camera's response,
     # but it allows the servo to respond accurately to the new frame being provided
-    time.sleep(0.75)
+    time.sleep(0.2)
 
     # Update the time and calculate delta of time and error
     self.currTime = time.time()

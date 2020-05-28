@@ -49,6 +49,7 @@ def detect_obj_center(objX, objY, centerX, centerY):
 
     # find the object's location
     objectLoc = obj.update(frame, (centerX.value, centerY.value))
+
     ((objX.value, objY.value), rect) = objectLoc
 
     time_difference = arrow.utcnow() - start_time
@@ -57,21 +58,39 @@ def detect_obj_center(objX, objY, centerX, centerY):
     # extract the bounding box and draw it
     if rect is not None:
       (x, y, w, h) = rect
-      cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0),
-        2)
+      cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     # display the frame to the screen
     cv2.imshow("Pan-Tilt Face Tracking", frame)
     cv2.waitKey(1)
 
-def run_servos(pan, tilt, image_width):
+def pid_process(output, p, i, d, objCoord, centerCoord):
+  # signal trap to handle keyboard interrupt
   signal.signal(signal.SIGINT, signal_handler)
+
+  # create a PID and initialize it
+  p = PID(p.value, i.value, d.value)
+  p.initialize()
+
+  # loop indefinitely
+  while True:
+    # calculate the error
+    error = centerCoord.value - objCoord.value
+    # update the value
+    output.value = p.update(error)
+
+def run_servos(pan, tilt):
+  signal.signal(signal.SIGINT, signal_handler)
+  
+  # define the servo range
+  servoRange = (-1.0, 1.0)
 
   # create the servo instance
   servo = ServoClass()
   
   while True:
-    servo.rotate(pan, image_width)
+    if pan.value > servoRange[0] and pan.value < servoRange[1]:
+      servo.rotate(pan.value)
     
 if __name__ == "__main__":
   # Start a multi-processing manager that will allow variable sharing between processes
@@ -88,6 +107,11 @@ if __name__ == "__main__":
     objX = manager.Value("i", 0)
     objY = manager.Value("i", 0)
 
+    # set PID values for panning
+    panP = manager.Value("f", 0.0025)
+    panI = manager.Value("f", 0.0005)
+    panD = manager.Value("f", 0.0004)
+
     #	Create a processes list
     processes = []
 
@@ -96,8 +120,10 @@ if __name__ == "__main__":
     #	2. Servo rotation
     processDetectObjCenter = Process(target=detect_obj_center, args=(objX, objY, centerX, centerY))
     processes.append(processDetectObjCenter)
-    # processRunServos = Process(target=run_servos, args=(pan, tilt, resolution[1]))
-    # processes.append(processRunServos)
+    processPanning = Process(target=pid_process, args=(pan, panP, panI, panD, objX, centerX))
+    processes.append(processPanning)
+    processRunServos = Process(target=run_servos, args=(pan, tilt))
+    processes.append(processRunServos)
 
     #	Start all processes
     for process in processes:
