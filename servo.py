@@ -5,7 +5,7 @@ import numpy as np
 import math
 
 class ServoClass:
-  def __init__(self, servo_pin=18):
+  def __init__(self, servo_pin):
     self.factory = PiGPIOFactory()
     self.servo_pin = servo_pin
     self.servo = gpiozero.Servo(servo_pin, pin_factory=self.factory)
@@ -23,10 +23,8 @@ class ServoClass:
     if diff > 0:
       # Rotate clockwise
       while diff > 0:
-        print('Rotating clockwise')
         try:
           self.servo.value -= 0.025
-          print("servo_value: ", self.servo.value)
         except gpiozero.exc.OutputDeviceBadValue:
           print('Bad value')
           pass
@@ -37,10 +35,8 @@ class ServoClass:
     elif diff < 0:
       # Rotate counter-clockwise
       while diff < 0:
-        print('Rotating counter-clockwise')
         try: 
           self.servo.value += 0.025
-          print("servo_value: ", self.servo.value)
         except gpiozero.exc.OutputDeviceBadValue:
           print('Bad value')
           pass

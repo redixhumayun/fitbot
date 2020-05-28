@@ -85,12 +85,18 @@ def run_servos(pan, tilt):
   # define the servo range
   servoRange = (-1.0, 1.0)
 
-  # create the servo instance
-  servo = ServoClass()
+  # create the servo instance for panning
+  servo_pan = ServoClass(servo_pin = 18)
+
+  # create the servo instance for tilting
+  servo_tilt = ServoClass(servo_pin = 12)
   
   while True:
     if pan.value > servoRange[0] and pan.value < servoRange[1]:
-      servo.rotate(pan.value)
+      servo_pan.rotate(pan.value)
+    
+    if tilt.value > servoRange[0] and tilt.value < servoRange[1]:
+      servo_tilt.rotate(tilt.value)
     
 if __name__ == "__main__":
   # Start a multi-processing manager that will allow variable sharing between processes
@@ -112,6 +118,13 @@ if __name__ == "__main__":
     panI = manager.Value("f", 0.0005)
     panD = manager.Value("f", 0.0004)
 
+    # set PID values for tilting
+    # PID values are negative because this servo rotates
+    # in the opposite direction of the first servo
+    tiltP = manager.Value("f", -0.003)
+    tiltI = manager.Value("f", -0.0005)
+    tiltD = manager.Value("f", -0.0004)
+
     #	Create a processes list
     processes = []
 
@@ -122,6 +135,8 @@ if __name__ == "__main__":
     processes.append(processDetectObjCenter)
     processPanning = Process(target=pid_process, args=(pan, panP, panI, panD, objX, centerX))
     processes.append(processPanning)
+    processTilting = Process(target=pid_process, args=(tilt, tiltP, tiltI, tiltD, objY, centerY))
+    processes.append(processTilting)
     processRunServos = Process(target=run_servos, args=(pan, tilt))
     processes.append(processRunServos)
 
