@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     #	Start a process for:
     #	1. Object detection
-    #	2. Servo rotation
+    #	2. Servo panning
     processDetectObjCenter = Process(target=detect_obj_center, args=(objX, objY, centerX, centerY))
     processes.append(processDetectObjCenter)
     processPanning = Process(target=pid_process, args=(pan, panP, panI, panD, objX, centerX))

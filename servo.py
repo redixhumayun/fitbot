@@ -11,14 +11,9 @@ class ServoClass:
     self.servo = gpiozero.Servo(servo_pin, pin_factory=self.factory)
 
   def rotate(self, pid_output):
-    # Only print out if value is not 0
-    if math.isclose(0, pid_output) is False:
-      print("pid_output: ", pid_output)
-    # diff = self.last_position - pid_output
+    # This calculation shouldn't be necessary
+    # TODO: Remove the sign flip and change if conditions
     diff = 0 - pid_output
-    # Only print out if value is not 0
-    if math.isclose(0, diff) is False:
-      print("diff: ", diff)
 
     # This margin of error is acceptable
     if  diff < 0.05 and diff > -0.05:
